@@ -1,0 +1,4 @@
+2018-07-03  Jeff Spaulding  <sarnet@gmail.com>
+
+	Initial version.  Only contains rand_char() and srand_from_file().
+

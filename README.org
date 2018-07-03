@@ -1,0 +1,92 @@
+* randutils
+
+  This is a small library of functions related to random number generation.
+  I'm writing this as I need them, so it should (hopefully) grow with time.
+  
+  I'm just tired of re-implementing this stuff.
+  
+  Please note that these functions are not intended to be used for anything
+  where actual randomness is important (i.e. cryptography, gambling, etc.).
+  Everything here is based on rand().
+  
+  Requires something vaguely POSIX and a c11 compiler.  I've tested it on
+  Ubuntu, but given that I always use FreeBSD man pages for programming stuff
+  I see no reason why it wouldn't run on most UNIX-like systems.  Create an
+  issue if it doesn't.
+
+** Functions
+
+*** char rand_ascii()
+
+    Returns a random printable ASCII character (between codes 32 and 126
+    inclusive).
+    
+    This uses rand() to generate the random number, although it XORs each byte
+    of the int into a single byte to hopefully reduce or eliminate issues with
+    lower-order bits not being random enough.
+
+*** int srand_from_file(char *filename)
+
+    Opens the file named by "filename" and reads an unsigned int from it, then
+    seeds the random number generator using srand().
+
+    Returns 0 on failure, nonzero on success.
+    
+    /dev/random and friends are interesting because they actually originated on
+    Linux and then migrated to other UNIX and UNIX-like systems.  They're not
+    required by POSIX, so there's quite a bit of variance between different UNIX
+    systems.
+
+    On Linux, /dev/random will block if there's not enough entropy, while
+    /dev/urandom will never block (even if it means you get poor random
+    numbers if the system hasn't generated enough entropy to seed the PRNG -
+    i.e. right after boot).  The BSD systems tend to vary quite a bit in how
+    they work.  As for commercial UNIX - you'll have to look that up for
+    yourself.  I haven't used any seriously since Solaris 8 and HP-UX 11.00 :)
+
+    My suggestion: if you want to be portable, test for /dev/urandom and use
+    that if it exists.  Then /dev/arandom.  Finally, /dev/random.  If you
+    don't have any of those, you're out of luck; maybe there's a handy
+    syscall you can use.  I only really care about Linux and the BSDs, so
+    it's easy for me.
+    
+** Installation
+
+   This isn't meant to be a system library.  Just compile it using "make" and
+   copy randutils.h and librandutils.a to the appropriate location in the
+   source tree of your project.  Link as you would any static library.
+   
+   See the Makefile for details on how to compile a program against the library
+   if you're having trouble.
+
+   A test program is included but not compiled by default.  You can compile it
+   with the command "make test_randutils."  Pass either -s or -c:
+   - -s Test srand_from_file()
+   - -c<number> Test rand_ascii()
+
+   Do note that the test for rand_ascii() only generates a sequence of random
+   characters and doesn't seed beforehand.  It does not test for actual
+   randomness.
+   
+** Todo
+   
+   - Add more functions.
+   - Automate testing.
+
+** License
+   
+   All code is copyright (C) 2018 by Jeff Spaulding <sarnet@gmail.com>.
+
+   This is the ISC License.
+
+   Permission to use, copy, modify, and distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
